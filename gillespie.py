@@ -17,12 +17,12 @@ class mRNADynamicsModel:
         self.delta = delta
         self.labels = ["T factor", "mRNA 1", "mRNA 2"]
 
-    def run_gillespe(self, N=100_000_000, start_at_ss=True):
+    def run_gillespie(self, N=100_000_000, start_at_ss=True):
         # If we start the simulation from the predicted steady states,
         # we will not need to wait for the initial rise in TF/mRNA
         # levels and our simulation therefore converges much more quickly
         x = self.compute_theoretical()[0] if start_at_ss else np.ones(3)
-        self.X, self.T, self.tsteps = fast_gillespe(
+        self.X, self.T, self.tsteps = fast_gillespie(
             np.array(x),
             self.alpha,
             self.tau1,
@@ -128,7 +128,7 @@ class mRNADynamicsModel:
 
 
 @njit
-def fast_gillespe(x, alpha, tau1, tau2, tau3, lambd, delta, N):
+def fast_gillespie(x, alpha, tau1, tau2, tau3, lambd, delta, N):
     t = 0
     T = np.zeros(N)
     tsteps = np.zeros(N)
@@ -153,10 +153,13 @@ def fast_gillespe(x, alpha, tau1, tau2, tau3, lambd, delta, N):
 if __name__ == "__main__":
     random.seed(42)
     D = np.array([[1, -1, 0, 0, 0, 0], [0, 0, 1, -1, 0, 0], [0, 0, 0, 0, 1, -1]])
-    print(
-        "Intialising model and running gillespie algorithm for 100,000,000 iteratations.\n"
-    )
     model = mRNADynamicsModel(alpha=10, tau1=2, tau2=2, tau3=4, lambd=10, delta=D)
-    model.run_gillespe()
+    print(
+        "Intialised model. Running Gillespie algorithm for 100,000,000 iters...\n"
+    )
+    start = time.time()
+    model.run_gillespie()
+    end = time.time()
     for table in model.collect_stats():
         print(tabulate(table, headers="keys", showindex=False), "\n")
+    print(f'Gillespie took {((end-start)*1000):.2f} ms to complete.🐥')
