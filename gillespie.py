@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as pyplot
+#import matplotlib.pyplot as pyplot
 from tabulate import tabulate
 from numba import njit
 import random
@@ -87,13 +87,14 @@ class mRNADynamicsModel:
         labs += [f"cov({self.labels[c[0]]}, {self.labels[c[1]]})" for c in combs]
         fdts = np.array(Xvars + Xcovs)
         all_covs = np.array(list(tw_w_vars) + tw_w_covs)
-
+        fluxes = self.get_fluxes()
         df1 = pd.DataFrame(
             {
                 "component": self.labels,
                 "predicted_mean": Xss,
                 "gillespie_mean": tw_means,
                 "percent_error": p_err,
+                "flux": fluxes
             }
         )
 
@@ -116,16 +117,20 @@ class mRNADynamicsModel:
         pyplot.ylabel("# of molecules")
         pyplot.legend(loc="best")
 
-    def plot_flux_hist(self):
-        R1p = np.full((1, len(self.X[0])), self.alpha)[0]
-        R1m = self.X[0] / self.tau1
-        R2p = self.lambd * self.X[0]
-        R2m = self.X[1] / self.tau2
-        R3p = R2p
-        R3m = self.X[2] / self.tau3
+    #def plot_flux_hist(self):
+
         pyplot.hist((R1p - R1m), 100, facecolor="red", alpha=0.5)
         pyplot.hist((R2p - R2m), 100, facecolor="green", alpha=0.3)
         pyplot.hist((R3p - R3m), 100, facecolor="blue", alpha=0.3)
+
+    def get_fluxes(self):
+        R1p = ((np.full((1, len(self.X[0])), self.alpha)[0])*self.tsteps).sum()/self.tsteps.sum()
+        R1m = ((self.X[0] / self.tau1)*self.tsteps).sum()/self.tsteps.sum()
+        R2p = ((self.lambd * self.X[0])*self.tsteps).sum()/self.tsteps.sum()
+        R2m = ((self.X[1] / self.tau2)*self.tsteps).sum()/self.tsteps.sum()
+        R3p = R2p
+        R3m = ((self.X[2] / self.tau3)*self.tsteps).sum()/self.tsteps.sum()
+        return [R1p-R1m, R2p-R2m, R3p-R3m]
 
     def __repr__(self):
         return f"<mRNADynamicsModel alpha: {self.alpha}, tau1: {self.tau1}, tau2: {self.tau2}, tau3: {self.tau3}, lambd: {self.tau3}>"
@@ -175,7 +180,7 @@ def main(alpha, tau1, tau2, tau3, lambd, iters):
     for table in model.collect_stats():
         print(tabulate(table, headers="keys", showindex=False), "\n")
     print(f"Gillespie took {((end-start)*1000):.2f} ms to complete.🐥")
-
+    print(model.get_fluxes())
 
 if __name__ == "__main__":
     main()

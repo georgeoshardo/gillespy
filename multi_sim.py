@@ -22,7 +22,7 @@ lambds = [1, 2, 5, 10, 50]
 
 
 @delayed  # Dask decorator to define tasks
-def gather_stats(model, tau1, alpha, lambd, N=100_000_000):
+def gather_stats(model, tau1, alpha, lambd, N=100_000):
     # Change model parameters and run Gillespie
     model.tau1 = tau1
     model.alpha = alpha
