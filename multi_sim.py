@@ -16,9 +16,9 @@ D = np.array([[1, -1, 0, 0, 0, 0], [0, 0, 1, -1, 0, 0], [0, 0, 0, 0, 1, -1]])
 
 model = M(alpha=10, tau1=2, tau2=2, tau3=4, lambd=10, delta=D)
 
-taus = [1, 2, 5, 10, 50]
-alphas = [1, 10, 100]
-lambds = [1, 2, 5, 10, 50]
+taus = [0.1, 1, 3, 5, 50]
+alphas = [0.1, 10, 100]
+lambds = [0.1, 1, 5, 10, 50]
 
 
 @delayed  # Dask decorator to define tasks
