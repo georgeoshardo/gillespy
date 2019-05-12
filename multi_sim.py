@@ -22,7 +22,7 @@ lambds = [1, 2, 5, 10, 50]
 
 
 @delayed  # Dask decorator to define tasks
-def gather_stats(model, tau1, alpha, lambd, N=1_000_000):
+def gather_stats(model, tau1, alpha, lambd, N=10_000_000):
     # Change model parameters and run Gillespie
     model.tau1 = tau1
     model.alpha = alpha
@@ -53,5 +53,4 @@ all_means = pd.concat([r[0] for r in results])
 all_covs = pd.concat([r[1] for r in results])
 
 all_means.to_csv('all_means.csv', index=False)
-all_means.to_csv('all_covs.csv', index=False)
-
+all_covs.to_csv('all_covs.csv', index=False)
