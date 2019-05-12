@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-#import matplotlib.pyplot as pyplot
+import matplotlib.pyplot as pyplot
 from tabulate import tabulate
 from numba import njit
 import random
@@ -180,7 +180,6 @@ def main(alpha, tau1, tau2, tau3, lambd, iters):
     for table in model.collect_stats():
         print(tabulate(table, headers="keys", showindex=False), "\n")
     print(f"Gillespie took {((end-start)*1000):.2f} ms to complete.🐥")
-    print(model.get_fluxes())
 
 if __name__ == "__main__":
     main()
