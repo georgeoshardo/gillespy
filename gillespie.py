@@ -5,6 +5,7 @@ from tabulate import tabulate
 from numba import njit
 import random
 import time
+import click
 
 
 class mRNADynamicsModel:
@@ -126,6 +127,9 @@ class mRNADynamicsModel:
         pyplot.hist((R2p - R2m), 100, facecolor="green", alpha=0.3)
         pyplot.hist((R3p - R3m), 100, facecolor="blue", alpha=0.3)
 
+    def __repr__(self):
+        return f"<mRNADynamicsModel alpha: {self.alpha}, tau1: {self.tau1}, tau2: {self.tau2}, tau3: {self.tau3}, lambd: {self.tau3}>"
+
 
 @njit
 def fast_gillespie(x, alpha, tau1, tau2, tau3, lambd, delta, N):
@@ -150,16 +154,28 @@ def fast_gillespie(x, alpha, tau1, tau2, tau3, lambd, delta, N):
     return X, T, tsteps
 
 
-if __name__ == "__main__":
+@click.command()
+@click.option("--alpha", default=10)
+@click.option("--tau1", default=2)
+@click.option("--tau2", default=2)
+@click.option("--tau3", default=4)
+@click.option("--lambd", default=4)
+@click.option("--iters", default=100_000_000)
+def main(alpha, tau1, tau2, tau3, lambd, iters):
     random.seed(42)
     D = np.array([[1, -1, 0, 0, 0, 0], [0, 0, 1, -1, 0, 0], [0, 0, 0, 0, 1, -1]])
-    model = mRNADynamicsModel(alpha=10, tau1=2, tau2=2, tau3=4, lambd=10, delta=D)
-    print(
-        "Intialised model. Running Gillespie algorithm for 100,000,000 iters...\n"
+    model = mRNADynamicsModel(
+        alpha=alpha, tau1=tau1, tau2=tau2, tau3=tau3, lambd=lambd, delta=D
     )
+    print(f"Initialised model: {model}")
+    print(f"Running Gillespie algorithm for {iters} iters...\n")
     start = time.time()
-    model.run_gillespie()
+    model.run_gillespie(iters)
     end = time.time()
     for table in model.collect_stats():
         print(tabulate(table, headers="keys", showindex=False), "\n")
-    print(f'Gillespie took {((end-start)*1000):.2f} ms to complete.🐥')
+    print(f"Gillespie took {((end-start)*1000):.2f} ms to complete.🐥")
+
+
+if __name__ == "__main__":
+    main()
