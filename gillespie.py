@@ -168,7 +168,7 @@ def main(alpha, tau1, tau2, tau3, lambd, iters):
         alpha=alpha, tau1=tau1, tau2=tau2, tau3=tau3, lambd=lambd, delta=D
     )
     print(f"Initialised model: {model}")
-    print(f"Running Gillespie algorithm for {iters} iters...\n")
+    print(f"Running Gillespie algorithm for {iters:,} iters...\n")
     start = time.time()
     model.run_gillespie(iters)
     end = time.time()
