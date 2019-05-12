@@ -24,7 +24,7 @@ class mRNADynamicsModel:
         # levels and our simulation therefore converges much more quickly
         x = self.compute_theoretical()[0] if start_at_ss else np.ones(3)
         self.X, self.T, self.tsteps = fast_gillespie(
-            np.array(x),
+            np.ceil(x).astype(int),
             self.alpha,
             self.tau1,
             self.tau2,
