@@ -3,6 +3,7 @@ __pycache__/*
 .vscode
 sim_testing.ipynb
 
+*.DS_Store
 *.csv
 
 plotting/*
