@@ -68,10 +68,13 @@ class mRNADynamicsModel:
         return [x1, x2, x3], [v1, v2, v3], [cov12, cov13, cov23]
 
     def run_gillespie(self, N=100_000_000, start_near_ss=False):
-        # If we start the simulation from the predicted steady states,
-        # we will not need to wait for the initial rise in TF/mRNA
-        # levels and our simulation therefore converges much more quickly
-        x = self.compute_theoretical()[0] if start_near_ss else np.ones(3)
+        """Runs Gillespie algorithm using model parameters.
+        
+        Note: Adds results from Gillespie as class attributes.
+        
+        """
+        # Optional flag for starting simulation from predicted steady states when testing. False by default.
+        x = self.compute_theoretical()[0] if start_near_ss else np.ones(3) # Start from one for each component.
         self.X, self.T, self.tsteps = fast_gillespie(
             np.ceil(x).astype(int),
             self.alpha,
