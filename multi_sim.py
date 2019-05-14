@@ -1,7 +1,6 @@
 import random
 import numpy as np
 import pandas as pd
-from tabulate import tabulate
 
 # Require Dask for running independent simulations in parallel
 from dask import compute, delayed
@@ -17,7 +16,7 @@ def gather_stats(model, tau1, alpha, lambd, N=100_000_000):
     """Gather statistics from Gillespie with different model parameters.
     
     Args: 
-        model:
+        model: Instance of mRNADynamicsModel class
         tau1 (float): transcription factor lifetime
         alpha (float): transcription factor birth rate
         lambd (float): mRNA birth rate
