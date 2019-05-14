@@ -6,10 +6,12 @@ import pandas as pd
 from dask import compute, delayed
 import dask.multiprocessing
 from dask.diagnostics import ProgressBar
+
 ProgressBar().register()
 
 # Require model for multiple simulations
-from gillespie import mRNADynamicsModel as M 
+from gillespie import mRNADynamicsModel as M
+
 
 @delayed  # Used to delay execution until scheduled on thread by Dask
 def gather_stats(model, tau1, alpha, lambd, N=100_000_000):
@@ -44,6 +46,7 @@ def gather_stats(model, tau1, alpha, lambd, N=100_000_000):
 
     return means, covs
 
+
 if __name__ == "__main__":
     random.seed(42)
 
@@ -71,5 +74,5 @@ if __name__ == "__main__":
     all_covs = pd.concat([r[1] for r in results])
 
     # Write data to files
-    all_means.to_csv('all_means.csv', index=False)
-    all_covs.to_csv('all_covs.csv', index=False)
+    all_means.to_csv("all_means.csv", index=False)
+    all_covs.to_csv("all_covs.csv", index=False)

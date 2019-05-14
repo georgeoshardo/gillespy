@@ -28,6 +28,7 @@ class mRNADynamicsModel:
         delta (ndarray): 2D diffusion matrix for system
         labels (list(str)): labels for each component in system
     """
+
     def __init__(self, alpha, tau1, tau2, tau3, lambd, delta):
         self.alpha = alpha
         self.tau1 = tau1
@@ -74,7 +75,9 @@ class mRNADynamicsModel:
         
         """
         # Optional flag for starting simulation from predicted steady states when testing. False by default.
-        x = self.compute_theoretical()[0] if start_near_ss else np.ones(3) # Start from one for each component.
+        x = (
+            self.compute_theoretical()[0] if start_near_ss else np.ones(3)
+        )  # Start from one for each component.
         self.X, self.T, self.tsteps = fast_gillespie(
             np.ceil(x).astype(int),
             self.alpha,
@@ -92,13 +95,15 @@ class mRNADynamicsModel:
         returns: List containing the flux balances for each component.
 
         """
-        R1p = ((np.full((1, len(self.X[0])), self.alpha)[0])*self.tsteps).sum()/self.tsteps.sum()
-        R1m = ((self.X[0] / self.tau1)*self.tsteps).sum()/self.tsteps.sum()
-        R2p = ((self.lambd * self.X[0])*self.tsteps).sum()/self.tsteps.sum()
-        R2m = ((self.X[1] / self.tau2)*self.tsteps).sum()/self.tsteps.sum()
+        R1p = (
+            (np.full((1, len(self.X[0])), self.alpha)[0]) * self.tsteps
+        ).sum() / self.tsteps.sum()
+        R1m = ((self.X[0] / self.tau1) * self.tsteps).sum() / self.tsteps.sum()
+        R2p = ((self.lambd * self.X[0]) * self.tsteps).sum() / self.tsteps.sum()
+        R2m = ((self.X[1] / self.tau2) * self.tsteps).sum() / self.tsteps.sum()
         R3p = R2p
-        R3m = ((self.X[2] / self.tau3)*self.tsteps).sum()/self.tsteps.sum()
-        return [R1p-R1m, R2p-R2m, R3p-R3m]
+        R3m = ((self.X[2] / self.tau3) * self.tsteps).sum() / self.tsteps.sum()
+        return [R1p - R1m, R2p - R2m, R3p - R3m]
 
     def collect_stats(self):
         """Calculates statistics for most recent Gillespie simulation.
@@ -109,7 +114,9 @@ class mRNADynamicsModel:
         # Theoretical values
         Xss, Xvars, Xcovs = self.compute_theoretical()
 
-        tw_means = (self.X * self.tsteps).sum(1) / self.tsteps.sum() # Time weighted means
+        tw_means = (self.X * self.tsteps).sum(
+            1
+        ) / self.tsteps.sum()  # Time weighted means
         p_err = (Xss - tw_means) / Xss * 100
         fluxes = self.get_fluxes()
         mean_stats = pd.DataFrame(
@@ -118,22 +125,26 @@ class mRNADynamicsModel:
                 "predicted_mean": Xss,
                 "gillespie_mean": tw_means,
                 "percent_error": p_err,
-                "flux": fluxes
+                "flux": fluxes,
             }
         )
 
-        res = self.X - tw_means[:, np.newaxis] # Residuals
-        tw_vars = (self.tsteps * res ** 2).sum(1) / self.tsteps.sum() # Time weighted variances
+        res = self.X - tw_means[:, np.newaxis]  # Residuals
+        tw_vars = (self.tsteps * res ** 2).sum(
+            1
+        ) / self.tsteps.sum()  # Time weighted variances
         tw_w_vars = tw_vars / tw_means ** 2  # Weighted time-weighted variance
         combs = ((0, 1), (0, 2), (1, 2))  # Covariance combinations
         tw_w_covs = [
             ((self.tsteps * (res[c[0]]) * (res[c[1]])).sum() / np.sum(self.tsteps))
             / (tw_means[c[0]] * tw_means[c[1]])
             for c in combs
-        ] # Weighted time-weighted covariance
+        ]  # Weighted time-weighted covariance
 
-        labels = [f"var({lab})" for lab in self.labels] + [f"cov({self.labels[c[0]]}, {self.labels[c[1]]})" for c in combs]
-        fdts = np.array(Xvars + Xcovs) # Concatenate lists for dataframe
+        labels = [f"var({lab})" for lab in self.labels] + [
+            f"cov({self.labels[c[0]]}, {self.labels[c[1]]})" for c in combs
+        ]
+        fdts = np.array(Xvars + Xcovs)  # Concatenate lists for dataframe
         all_covs = np.array(list(tw_w_vars) + tw_w_covs)
         vars_covars_stats = pd.DataFrame(
             {
@@ -199,7 +210,7 @@ def fast_gillespie(x, alpha, tau1, tau2, tau3, lambd, delta, N):
         )
         summed = np.sum(rates)
 
-        # Determine WHEN state change occurs 
+        # Determine WHEN state change occurs
         tau = (-1) / summed * np.log(random.random())
         t = t + tau
         T[i] = t
@@ -248,6 +259,7 @@ def main(alpha, tau1, tau2, tau3, lambd, iters):
     for table in model.collect_stats():
         print(tabulate(table, headers="keys", showindex=False), "\n")
     print(f"Gillespie took {((end-start)*1000):.2f} ms to complete.🐥")
+
 
 if __name__ == "__main__":
     main()
