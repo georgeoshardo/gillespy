@@ -1,11 +1,58 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as pyplot
-from tabulate import tabulate
-from numba import njit
+from tabulate import tabulate # For text printing to terminal
+from numba import njit  # For just-in-time compilation to LLVM
 import random
 import time
-import click
+import click  # For command line interface
+
+
+@njit # Numba decorator; compiles function to efficient machine code (LLVM)
+def fast_gillespie(x, alpha, tau1, tau2, tau3, lambd, delta, N):
+    """Optimised Gillespie algorithm using jit.
+
+    Args:
+        x (ndarray(int)): Initial counts for tf, mRNA1, and mRNA2
+        alpha (float): transcription factor birth rate
+        tau1 (float): transcription factor lifetime
+        tau2 (float): mRNA 1 lifetime
+        tau3 (float): mRNA 2 lifetime
+        lambd (float): mRNA birth rate
+        delta (ndarray): 2D diffusion matrix for system
+        N (int): number of iterations for Gillespie
+
+    returns:
+        X (ndarray(int)): Trace of component counts for each iteration.
+        T (ndarray(float)): Time adjusted trace of time during simulation.
+        tsteps (ndarray(float)): Time weight trace; duration of time spent in each state.
+    """
+    # Initialisation
+    t = 0
+    T = np.zeros(N)
+    tsteps = np.zeros(N)
+    X = np.zeros((delta.shape[0], N))
+
+    # Simulation
+    for i in range(N):
+        # Determine rates
+        rates = np.array(
+            [alpha, x[0] / tau1, lambd * x[0], x[1] / tau2, lambd * x[0], x[2] / tau3]
+        )
+        summed = np.sum(rates)
+
+        # Determine WHEN state change occurs
+        tau = (-1) / summed * np.log(random.random())
+        t = t + tau
+        T[i] = t
+        tsteps[i] = tau
+
+        # Determine WHICH reaction occurs with relative propabilities
+        reac = np.sum(np.cumsum(np.true_divide(rates, summed)) < random.random())
+        x = x + delta[:, reac]
+        X[:, i] = x
+
+    return X, T, tsteps
 
 
 class mRNADynamicsModel:
@@ -175,53 +222,6 @@ class mRNADynamicsModel:
 
     def __repr__(self):
         return f"<mRNADynamicsModel alpha: {self.alpha}, tau1: {self.tau1}, tau2: {self.tau2}, tau3: {self.tau3}, lambd: {self.tau3}>"
-
-
-@njit
-def fast_gillespie(x, alpha, tau1, tau2, tau3, lambd, delta, N):
-    """Optimised Gillespie algorithm using jit.
-    
-    Args: 
-        x (ndarray(int)): Initial counts for tf, mRNA1, and mRNA2
-        alpha (float): transcription factor birth rate
-        tau1 (float): transcription factor lifetime
-        tau2 (float): mRNA 1 lifetime
-        tau3 (float): mRNA 2 lifetime
-        lambd (float): mRNA birth rate
-        delta (ndarray): 2D diffusion matrix for system
-        N (int): number of iterations for Gillespie
-
-    returns: 
-        X (ndarray(int)): Trace of component counts for each iteration.
-        T (ndarray(float)): Time adjusted trace of time during simulation.
-        tsteps (ndarray(float)): Time weight trace; duration of time spent in each state.
-    """
-    # Initialisation
-    t = 0
-    T = np.zeros(N)
-    tsteps = np.zeros(N)
-    X = np.zeros((delta.shape[0], N))
-
-    # Simulation
-    for i in range(N):
-        # Determine rates
-        rates = np.array(
-            [alpha, x[0] / tau1, lambd * x[0], x[1] / tau2, lambd * x[0], x[2] / tau3]
-        )
-        summed = np.sum(rates)
-
-        # Determine WHEN state change occurs
-        tau = (-1) / summed * np.log(random.random())
-        t = t + tau
-        T[i] = t
-        tsteps[i] = tau
-
-        # Determine WHICH reaction occurs from cummulative distribution
-        reac = np.sum(np.cumsum(np.true_divide(rates, summed)) < random.random())
-        x = x + delta[:, reac]
-        X[:, i] = x
-
-    return X, T, tsteps
 
 
 @click.command()

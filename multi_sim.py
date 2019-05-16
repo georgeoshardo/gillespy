@@ -57,9 +57,14 @@ if __name__ == "__main__":
     model = M(alpha=10, tau1=2, tau2=2, tau3=4, lambd=10, delta=D)
 
     # Parameters to test
-    taus = [0.1, 1, 3, 5, 50]
-    alphas = [0.1, 10, 100]
-    lambds = [0.1, 1, 5, 10, 50]
+    taus = [1, 2, 3, 4, 5]
+    alphas = [1, 2, 3, 4]
+    lambds = [2, 4, 6, 8, 10]
+
+    # Second test set
+    # taus = [0.01, 0.1, 50]
+    # alphas = [0.1, 1, 5, 50]
+    # lambds = [0.1, 5, 10, 100]
 
     # Create dask graph of desired simulations
     values = [
