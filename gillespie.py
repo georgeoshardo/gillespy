@@ -121,7 +121,8 @@ class mRNADynamicsModel:
         Note: Adds results from Gillespie as class attributes.
         
         """
-        # Optional flag for starting simulation from predicted steady states when testing. False by default.
+        # Optional flag for starting simulation from predicted steady states when testing. 
+        # False by default.
         x = (
             self.compute_theoretical()[0] if start_near_ss else np.ones(3)
         )  # Start from one for each component.
