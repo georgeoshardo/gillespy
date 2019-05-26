@@ -1,4 +1,5 @@
 ## Getting started
+Python 3.7
 ```bash
 conda install numpy matplotlib tabulate pandas numba dask  
 ```
@@ -19,10 +20,10 @@ means, covariances = model.collect_stats()
 ```
 #### CLI:
 ```bash
-python gillespie.py --alpha=10 --tau1=2 --lambd=4 --iters=10_000_000
+$ python gillespie.py --alpha=10 --tau1=2 --lambd=4 --iters=10_000_000
 
 # Initialised model: <mRNADynamicsModel alpha: 10, tau1: 2, tau2: 2, tau3: 4, lambd: 4>
-# Running Gillespie algorithm for 10000000 iters...
+# Running Gillespie algorithm for 10,000,000 iters...
 #
 # component      predicted_mean    gillespie_mean    percent_error
 # -----------  ----------------  ----------------  ---------------
