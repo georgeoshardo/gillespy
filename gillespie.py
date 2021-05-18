@@ -42,7 +42,7 @@ def fast_gillespie(x, alpha, tau1, tau2, tau3, lambd, delta, N):
         summed = np.sum(rates)
 
         # Determine WHEN state change occurs
-        tau = (-1) / summed * np.log(random.random())
+        tau = (-1) / (summed * np.log(random.random()))
         t = t + tau
         T[i] = t
         tsteps[i] = tau
